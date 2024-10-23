@@ -12,8 +12,7 @@
         <input type="file" id="csvFileInput" accept=".csv" class="form-control mb-3">
         <button id="parseButton" class="btn btn-primary mb-3">Parse CSV</button>
         <div id="languageMapping" class="mt-4"></div>
-        <button id="generateJsonButton" class="btn btn-success mt-3">Generate JSON</button>
-        <pre id="jsonOutput" class="mt-4"></pre>
+        <button id="downloadJsonButton" class="btn btn-secondary mt-3">Download JSON</button>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -50,6 +49,9 @@
                 header: true,
                 complete: function(results) {
                     processCsv(results.data);
+                    const json = generateJson(results.data);
+                    const jsonString = JSON.stringify(json, null, 2);
+                    enableDownload(jsonString);
                 }
             });
         });
@@ -100,22 +102,6 @@
             });
         }
 
-        document.getElementById('generateJsonButton').addEventListener('click', () => {
-            const fileInput = document.getElementById('csvFileInput');
-            if (fileInput.files.length === 0) {
-                alert('Please select a CSV file to parse.');
-                return;
-            }
-            const file = fileInput.files[0];
-            Papa.parse(file, {
-                header: true,
-                complete: function(results) {
-                    const json = generateJson(results.data);
-                    document.getElementById('jsonOutput').textContent = JSON.stringify(json, null, 2);
-                }
-            });
-        });
-
         function generateJson(data) {
             const json = {
                 client_identifier: "1fae0f32-f740-47b3-ad98-eaf190a98b9f",
@@ -146,6 +132,14 @@
         function guessKind(term) {
             // Apply the rules provided: if term is always the same, it's a "name"
             return term.match(/^[A-Z]/) ? "name" : "general";
+        }
+
+        function enableDownload(jsonString) {
+            const downloadButton = document.getElementById('downloadJsonButton');
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            downloadButton.href = url;
+            downloadButton.download = 'translated_terms.json';
         }
     </script>
 </body>
