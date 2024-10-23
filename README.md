@@ -1,4 +1,4 @@
-# CSV to JSON Converter
+# CSV to JSON Glossary Converter
 
 This project is a simple web-based tool for converting CSV files into a structured JSON format. It provides an easy way for users to upload a CSV, map the language codes, and generate a JSON file, all without needing any backend services. The project uses HTML, JavaScript, and the PapaParse library to make the CSV parsing straightforward.
 
