@@ -9,10 +9,11 @@
 <body>
     <div class="container mt-5">
         <h2 class="mb-4">CSV to JSON Converter</h2>
+        <p class="text-muted">To get the client identifier, go to AMS and find your site's organization. Then click on the button "Export Glossary". Open it with a text editor and copy the client identifier from there.</p>
         <input type="file" id="csvFileInput" accept=".csv" class="form-control mb-3">
-        <button id="parseButton" class="btn btn-primary mb-3">Parse CSV</button>
-        <div id="languageMapping" class="mt-4"></div>
-        <button id="downloadJsonButton" class="btn btn-secondary mt-3">Download JSON</button>
+        <a id="parseButton" class="btn btn-primary mb-3" role="button">Parse CSV</a>
+        <div id="languageMapping" class="mt-4" style="display: none;"></div>
+        <a id="downloadJsonButton" class="btn btn-secondary mt-3" style="display: none;" role="button">Download JSON</a>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -44,12 +45,18 @@
                 alert('Please select a CSV file to parse.');
                 return;
             }
+            const clientIdentifier = prompt('Please enter the client identifier:');
+            if (!clientIdentifier) {
+                
+                resetApplication();
+                return;
+            }
             const file = fileInput.files[0];
             Papa.parse(file, {
                 header: true,
                 complete: function(results) {
                     processCsv(results.data);
-                    const json = generateJson(results.data);
+                    const json = generateJson(results.data, clientIdentifier);
                     const jsonString = JSON.stringify(json, null, 2);
                     enableDownload(jsonString);
                 }
@@ -58,6 +65,7 @@
 
         function processCsv(data) {
             const languageMappingDiv = document.getElementById('languageMapping');
+            languageMappingDiv.style.display = 'block';
             languageMappingDiv.innerHTML = '';
 
             const languages = Object.keys(data[0]).filter(key => key !== 'en');
@@ -102,9 +110,16 @@
             });
         }
 
-        function generateJson(data) {
+        function resetApplication() {
+            document.getElementById('csvFileInput').value = '';
+            document.getElementById('languageMapping').innerHTML = '';
+            document.getElementById('languageMapping').style.display = 'none';
+            document.getElementById('downloadJsonButton').style.display = 'none';
+        }
+
+        function generateJson(data, clientIdentifier) {
             const json = {
-                client_identifier: "1fae0f32-f740-47b3-ad98-eaf190a98b9f",
+                client_identifier: clientIdentifier,
                 en: {}
             };
 
@@ -140,6 +155,7 @@
             const url = URL.createObjectURL(blob);
             downloadButton.href = url;
             downloadButton.download = 'translated_terms.json';
+            downloadButton.style.display = 'block';
         }
     </script>
 </body>
